@@ -1,6 +1,12 @@
-class NullPieace < Piece
-
+class NullPiece < Piece
+    
+    include Singleton
     def initialize
-        Singleton
+        @color = 
+        @symbol = 
     end
+    def to_s
+        return ' '
+    end
+
 end
