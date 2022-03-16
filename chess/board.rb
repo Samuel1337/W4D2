@@ -1,30 +1,49 @@
 require_relative 'piece'
+require_relative 'rook'
+require_relative 'knight'
+require_relative 'bishop'
+require_relative 'pawn'
+require_relative 'queen'
+require_relative 'king'
+require_relative 'null_piece'
+require "byebug"
 
 class Board
-    attr_reader :rows, :black_pieces_main_row, :black_pieces_pawn_row, :white_pieces_main_row, :white_pieces_pawn_row
+    attr_reader :rows, :pieces 
     
     def initialize
         @rows = Array.new(8) {Array.new(8)}
         
-        @black_pieces_main_row = ['b_r_rook', 'b_r_knight', 'b_r_bishop', 'b_king', 'b_queen', 'b_l_bishop', 'b_l_knight', 'b_l_rook']
-        @black_pieces_pawn_row = ['b_pawn_1', 'b_pawn_2', 'b_pawn_3', 'b_pawn_4', 'b_pawn_5', 'b_pawn_6', 'b_pawn_7', 'b_pawn_8']
-
-        @white_pieces_main_row = ['w_l_rook', 'w_l_knight', 'w_l_bishop', 'w_king', 'w_queen', 'w_r_bishop', 'w_r_knight', 'w_r_rook']
-        @white_pieces_pawn_row = ['w_pawn_1', 'w_pawn_2', 'w_pawn_3', 'w_pawn_4', 'w_pawn_5', 'w_pawn_6', 'w_pawn_7', 'w_pawn_8']
+        @pieces = %w(rook knight bishop king queen pawn) 
         
         setup_board
     end
     
     def setup_board
 
-        queue = black_pieces_main_row + black_pieces_pawn_row + [nil] * 8 * 4 + black_pieces_pawn_row + white_pieces_main_row
+        queue = %w(rook knight bishop king queen bishop knight rook) + 
+                ["pawn"]*8 + [nil] * 8 * 4 + ["pawn"]*8 + %w(rook knight bishop king queen bishop knight rook)
 
         (0..7).each do |idx|
             (0..7).each do |jdx|
-                rows[idx][jdx] = Piece.new(queue.shift,[idx,jdx])
+                color = (idx < 5 ? :black : :white)
+                rows[idx][jdx] = add_piece(queue.shift, color, [idx,jdx])
             end
         end
 
+        (2..5).each {|i| rows[i] = [NullPiece.instance]*8}
+
+    end
+
+    def add_piece(piece, color, pos)
+
+        return Rook.new(color,self,pos)    if piece == "rook"
+        return Knight.new(color,self,pos)  if piece == "knight"
+        return Bishop.new(color,self,pos)  if piece == "bishop"
+        return Queen.new(color,self,pos)   if piece == "queen"
+        return King.new(color,self,pos)    if piece == "king"
+        return Pawn.new(color,self,pos)    if piece == "pawn"
+        return NullPiece.instance          if piece == nil
     end
 
     def render
@@ -33,65 +52,65 @@ class Board
     end
 
     def [](pos)
-        rows[pos[0]][pos[1]] 
+        row,col = pos
+        rows[row][col] 
     end
     
     def []=(pos,val)
-        rows[pos[0]][pos[1]] = val
+        row,col = pos
+        rows[row][col] = val
     end
     
+    def inbound?(pos)
+        row,col = pos
+        row.between?(0,7) && col.between?(0,7)
+    end
+
     def valid_pos?(start_pos)
-        !rows[start_pos].name.nil?
+        row,col = start_pos
+        return false if !inbound?(start_pos)
+        piece = rows[row][col]
+        return piece.empty? || piece.color != self[start_pos].color
     end
 
-    def valid_move?(end_pos)
-        x, y = end_pos
-        return false if !x.between?(0,7) || !y.between?(0,7)
-        return true
+    def checkmate?(color)
+
     end
 
-    def move_piece(start_pos,end_pos)
-        # raise "Invalid Pos" if !valid_pos?(start_pos)
-        self[end_pos] = self[start_pos]
-        self[start_pos] = Piece.new(nil, start_pos)
+    def in_check?(color)
+        
+    end
+
+    def find_king(color)
+
+    end
+
+    def pieces 
+        @pieces
+    end
+
+    def dup 
+        self.dup
+    end
+
+    def move_piece!(start_pos,end_pos)
+        debugger
+        piece = self[start_pos]
+        if piece.moves.include?(end_pos)
+            # puts "#{piece.symbol} at #{start_pos} to #{end_pos}"
+            self[end_pos] = piece
+            piece.pos = end_pos
+            self[start_pos] = NullPiece.instance
+        else
+            raise "Invalid Position OH NO!" 
+        end
         render
     end
 end
 
-
-# w_l_rook   = Piece.new('w_l_rook')
-# w_l_bishop = Piece.new('w_l_bishop')
-# w_l_knight = Piece.new('w_l_knight')
-# w_r_rook   = Piece.new('w_r_rook')
-# w_r_bishop = Piece.new('w_r_bishop')
-# w_r_knight = Piece.new('w_r_knight')
-# w_queen    = Piece.new('w_queen')
-# w_king     = Piece.new('w_king')
-# w_pawn_1   = Piece.new('w_pawn_1')
-# w_pawn_2   = Piece.new('w_pawn_2')
-# w_pawn_3   = Piece.new('w_pawn_3')
-# w_pawn_4   = Piece.new('w_pawn_4')
-# w_pawn_5   = Piece.new('w_pawn_5')
-# w_pawn_6   = Piece.new('w_pawn_6')
-# w_pawn_7   = Piece.new('w_pawn_7')
-# w_pawn_8   = Piece.new('w_pawn_8')
-# b_l_rook   = Piece.new('b_l_rook')
-# b_l_bishop = Piece.new('b_l_bishop')
-# b_l_knight = Piece.new('b_l_knight')
-# b_r_rook   = Piece.new('b_r_rook')
-# b_r_bishop = Piece.new('b_r_bishop')
-# b_r_knight = Piece.new('b_r_knight')
-# b_queen    = Piece.new('b_queen')
-# b_king     = Piece.new('b_king')
-# b_pawn_1   = Piece.new('b_pawn_1')
-# b_pawn_2   = Piece.new('b_pawn_2')
-# b_pawn_3   = Piece.new('b_pawn_3')
-# b_pawn_4   = Piece.new('b_pawn_4')
-# b_pawn_5   = Piece.new('b_pawn_5')
-# b_pawn_6   = Piece.new('b_pawn_6')
-# b_pawn_7   = Piece.new('b_pawn_7')
-# b_pawn_8   = Piece.new('b_pawn_8')
-
 b = Board.new
 b.render
-b.move_piece([6,3],[4,3])
+b.move_piece!([1,3],[3,3])
+b.move_piece!([0,4],[3,1])
+b.move_piece!([0,1],[2,2])
+b.move_piece!([3,1],[6,1])

@@ -1,26 +1,42 @@
+# require 'colorize'
+
 class Piece
     
-    attr_reader :name, :start_pos
-    attr_accessor :pos
-    def initialize(name,start_pos)
-        @name = name
-        @start_pos = start_pos
-        @pos = @start_pos
-        
+    attr_accessor :color, :board, :pos
+    def initialize(color, board, pos)
+        @color = color
+        @board = board
+        @pos = pos
     end
 
     def to_s
-        return " " if name == nil
-        return 'b' if name.include?('bishop')
-        return 'r' if name.include?('rook')   
-        return 'n' if name.include?('knight') 
-        return 'K' if name.include?('king')   
-        return 'p' if name.include?('pawn')
-        return 'q' if name.include?('queen')  
+       "#{symbol}"
+    end
+    
+    def empty?
+        false
+    end
+    
+    def valid_moves(end_pos)
+        x, y = end_pos
+        return false if !x.between?(0,7) || !y.between?(0,7)
+        return true
+    end
+
+    def symbol
+        raise NotImplementedError
     end
 
     def moves
-        
+        raise NotImplementedError
     end
 
+    def move_dirs
+        raise NotImplementedError
+    end
+
+    private
+    def move_into_check?(end_pos)
+
+    end
 end
