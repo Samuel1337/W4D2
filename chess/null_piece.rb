@@ -2,8 +2,8 @@ class NullPiece < Piece
     
     include Singleton
     def initialize
-        @color = 
-        @symbol = 
+        @color
+        @symbol
     end
     def to_s
         return ' '
