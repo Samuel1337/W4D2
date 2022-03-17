@@ -94,10 +94,9 @@ class Board
     end
 
     def move_piece!(start_pos,end_pos)
-        debugger
+      
         piece = self[start_pos]
         if piece.moves.include?(end_pos)
-            # puts "#{piece.symbol} at #{start_pos} to #{end_pos}"
             self[end_pos] = piece
             piece.pos = end_pos
             self[start_pos] = NullPiece.instance
